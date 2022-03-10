@@ -1073,6 +1073,8 @@ class Caffe2Onnx():
                                                 MVN_name, output_name,
                                                 input_shape)
                 self.onnxNodeList.append(MVN_node)
+            elif Layers[i].type == "Silence":
+                print("skip layer: " + Layers[i].name + " (Silence)")
             else:
                 print("Failed type not support: " + Layers[i].type)
                 exit(-1)
