@@ -699,7 +699,7 @@ class Caffe2Onnx():
                     slice_name.extend(axes_param)
 
                     Slice_node = op.createSlice(SliceLayer, output_name_list[i], slice_name, [output_name_list[i]],
-                                                input_shape, starts[i], ends[i])
+                                                input_shape, starts[i], ends[i], axes[i])
                     # 3. Add node to node list 
                     self.onnxNodeList.append(Slice_node)
             # Reshape

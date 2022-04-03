@@ -53,21 +53,14 @@ def analyzeLayer(layer, input_shape):
 #     return attributs
 
 
-def getSliceOutShape(input_shape, start, end):
-    if len(input_shape[0]) == 4:
-        output_shape = [[input_shape[0][0], end - start, input_shape[0][2], input_shape[0][3]]]
-    elif len(input_shape[0]) == 2:
-        output_shape = [[input_shape[0][0], end - start]]
-    else:
-        print("Unsupport slice shape")
-        exit(-1)
-
+def getSliceOutShape(input_shape, start, end, axis):
+    output_shape = [[end - start if i == axis else input_shape[0][i] for i in range(len(input_shape[0]))]]
     return output_shape
 
 
-def createSlice(layer, node_name, input_name, output_name, input_shape, start, end):
+def createSlice(layer, node_name, input_name, output_name, input_shape, start, end, axis):
 
-    output_shape = getSliceOutShape(input_shape, start, end)
+    output_shape = getSliceOutShape(input_shape, start, end, axis)
 
     node = Node.c2oNode(layer, node_name, "Slice", input_name, output_name, input_shape, output_shape, Flag=True)
     return node
