@@ -508,10 +508,25 @@ class Caffe2Onnx():
                 node_name = Layers[i].name
 
                 # 2.Build softmax_node
-                softmax_node = op.createSoftmax(Layers[i], node_name, input_name, output_name, input_shape)
+
+                # HACK: In ONNX, softmax is applied to a 2D tensor along the second axis. N-dimensional inputs
+                # are coerced to 2D tensors as [T_0 T_1 ... T_{axis-1}], [T_{axis} ... T_{n}]. Therefore, Caffe's
+                # NCHW format needs to be transposed to HWNC to preserve the behavior of softmax.
+                nchw_to_hwnc = [2, 3, 0, 1]
+                hwnc_input_shape = [[input_shape[0][d] for d in nchw_to_hwnc]]
+
+                transpose_output = [input_name[0] + "_transpose"]
+                transpose_node = c2oNode(Layers[i], node_name + "_transpose", "Transpose", input_name, transpose_output, input_shape, hwnc_input_shape, {"perm": nchw_to_hwnc})
+
+                softmax_output = [input_name[0] + "_softmax"]
+                softmax_node = op.createSoftmax(Layers[i], node_name, transpose_output, softmax_output, hwnc_input_shape)
+
+                transpose_back_node = c2oNode(Layers[i], node_name + "_transpose_back", "Transpose", softmax_output, output_name, hwnc_input_shape, input_shape, {"perm": nchw_to_hwnc})
 
                 # 3.Add node to node list 
+                self.onnxNodeList.append(transpose_node)
                 self.onnxNodeList.append(softmax_node)
+                self.onnxNodeList.append(transpose_back_node)
 
 
             # Relu

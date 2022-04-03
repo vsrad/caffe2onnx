@@ -5,7 +5,8 @@ def getSoftmaxAttri(layer):
 
     axis = layer.softmax_param.axis
 
-    dict = {"axis": axis}
+    # HACK: the axis is reversed (see Softmax conversion notes in caffe2onnx.py)
+    dict = {"axis": -axis}
     return dict
     
 
